@@ -7,13 +7,14 @@ import (
 	"io"
 	"os"
 	"strings"
+	"time"
 )
 
 func main() {
 	// quiz problems passed in through command-line
 	args := os.Args[1:]
 
-	// Open the file and parse quiz questions, maybe use a map
+	// Open the file and parse quiz questions
 	file, err := os.Open(args[0])
 	if err != nil {
 		fmt.Println("Error:", err)
@@ -22,12 +23,11 @@ func main() {
 	defer file.Close()
 
 	c := csv.NewReader(file)
-
 	c.Comma = ';'
+
 	score := 0
 	count := 0
 	var questions, answers [100]string
-
 	for {
 		// Read a single record which is one line
 		record, err := c.Read()
@@ -38,7 +38,6 @@ func main() {
 			return
 		}
 
-		// Split the record
 		s := strings.Split(record[0], ",")
 		q, a := s[0], s[1]
 
@@ -48,20 +47,30 @@ func main() {
 		count++
 	}
 
-	for i := 0; i < count; i++ {
-		// Print question
-		fmt.Println("What is", questions[i], "?")
+	t1 := time.NewTimer(30 * time.Second)
+	done := make(chan bool)
 
-		// Wait for answer
-		r := bufio.NewReader(os.Stdin)
-		text, _ := r.ReadString('\n')
+	go func() {
+		for i := 0; i < count; i++ {
+			fmt.Println("What is", questions[i], "?")
 
-		// Check if input matches answer
-		if strings.TrimRight(text, "\n") == answers[i] {
-			score++
+			// Wait for answer
+			r := bufio.NewReader(os.Stdin)
+			text, _ := r.ReadString('\n')
+
+			// Check if input matches answer
+			if strings.TrimRight(text, "\n") == answers[i] {
+				score++
+			}
 		}
+		done <- true
+	}()
+
+	select {
+	case <-done:
+	case <-t1.C:
+		fmt.Println("Time's up!")
 	}
 
-	// Print final score
 	fmt.Println("Final Score:", score, "/", count)
 }
