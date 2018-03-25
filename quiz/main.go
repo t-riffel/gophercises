@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"encoding/csv"
+	"flag"
 	"fmt"
 	"io"
 	"os"
@@ -11,11 +12,13 @@ import (
 )
 
 func main() {
-	// quiz problems passed in through command-line
-	args := os.Args[1:]
+	var csvPath = flag.String("csv", "problems.csv", "the csv file from gophercises")
+	var timeLimit = flag.Int("time", 30, "time limit for the whole quiz in seconds")
 
-	// Open the file and parse quiz questions
-	file, err := os.Open(args[0])
+	flag.Parse()
+
+	// Open the file
+	file, err := os.Open(*csvPath)
 	if err != nil {
 		fmt.Println("Error:", err)
 		return
@@ -47,7 +50,7 @@ func main() {
 		count++
 	}
 
-	t1 := time.NewTimer(30 * time.Second)
+	t1 := time.NewTimer(time.Duration(*timeLimit) * time.Second)
 	done := make(chan bool)
 
 	go func() {
