@@ -50,6 +50,9 @@ func main() {
 		count++
 	}
 
+	fmt.Println("Press ENTER to start the quiz/timer")
+	bufio.NewScanner(os.Stdout).Scan()
+
 	t1 := time.NewTimer(time.Duration(*timeLimit) * time.Second)
 	done := make(chan bool)
 
