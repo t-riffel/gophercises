@@ -30,6 +30,7 @@ func main() {
 
 	score := 0
 	count := 0
+	// Max number of questions will be 100
 	var questions, answers [100]string
 	for {
 		// Read a single record which is one line
@@ -65,7 +66,7 @@ func main() {
 			text, _ := r.ReadString('\n')
 
 			// Check if input matches answer
-			if strings.TrimRight(text, "\n") == answers[i] {
+			if strings.TrimRight(strings.TrimSpace(strings.ToLower(text)), "\n") == answers[i] {
 				score++
 			}
 		}
